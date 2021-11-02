@@ -184,6 +184,7 @@ def load_config(file_name):
     configs = [Config(r1, r2) for r1, r2 in config]
     return configs
 
+
 @dataclass
 class Log:
     file_name: str
@@ -197,6 +198,7 @@ class Log:
         with open(self.file_name, "w") as fp:
             json.dump(self.log, fp)
 
+
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument(
@@ -209,8 +211,7 @@ def parse_args():
     )
 
     parser.add_argument(
-        "log_file",
-        help="Specify output log JSON file. If existing will be overwritten"
+        "log_file", help="Specify output log JSON file. If existing will be overwritten"
     )
 
     return parser.parse_args()
@@ -231,6 +232,7 @@ def main():
         log.add_entry(conf, alpha)
 
     log.save()
+
 
 if __name__ == "__main__":
     main()
