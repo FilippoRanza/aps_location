@@ -15,7 +15,6 @@ import numpy as np
 import gurobipy as gp
 
 
-
 @dataclass
 class Config:
     radius_small: float
@@ -23,7 +22,8 @@ class Config:
 
 
 def compute_reach_coefficent(distances: np.ndarray, time: float):
-    return distances <= time
+    tmp = distances <= time
+    return tmp.astype(np.int8)
 
 
 @dataclass
@@ -38,8 +38,12 @@ class Model:
     locations: np.ndarray
 
     def setup(self):
-        self.gamma_coeff = (self.distances <= self.config.radius_small).astype(np.int8)
-        self.delta_coeff = (self.distances <= self.config.radius_large).astype(np.int8)
+        self.gamma_coeff = compute_reach_coefficent(
+            self.distances, self.config.radius_small
+        )
+        self.delta_coeff = compute_reach_coefficent(
+            self.distances, self.config.radius_large
+        )
         return self
 
     def build_model(self, facilities: int, alpha: float):
@@ -56,7 +60,7 @@ class Model:
         """
         Initialize model variables
         """
-        self.ambulance_count = self.model.addVars(
+        self.aps_count = self.model.addVars(
             range(facility_locs), vtype=gp.GRB.INTEGER, name="y"
         )
         self.k_one_coverage = self.model.addVars(
@@ -70,8 +74,7 @@ class Model:
         # constraint (2)
         self.model.addConstrs(
             gp.quicksum(
-                self.delta_coeff[i, j] * self.ambulance_count[j]
-                for j in self.ambulance_count
+                self.delta_coeff[i, j] * self.aps_count[j] for j in self.aps_count
             )
             >= 1
             for i, v in enumerate(self.demand)
@@ -89,8 +92,7 @@ class Model:
         # constraint (4)
         self.model.addConstrs(
             gp.quicksum(
-                self.gamma_coeff[i, j] * self.ambulance_count[j]
-                for j in self.ambulance_count
+                self.gamma_coeff[i, j] * self.aps_count[j] for j in self.aps_count
             )
             >= self.k_one_coverage[x1] + self.k_two_coverage[x2]
             for i, (x1, x2) in enumerate(zip(self.k_one_coverage, self.k_two_coverage))
@@ -103,12 +105,11 @@ class Model:
         )
 
         # constraint (6)
-        self.model.addConstr(gp.quicksum(self.ambulance_count) == facilities)
+        self.model.addConstr(gp.quicksum(self.aps_count) == facilities)
 
         # constraint (7)
         self.model.addConstrs(
-            self.ambulance_count[y] <= c
-            for y, c in zip(self.ambulance_count, self.locations)
+            self.aps_count[y] <= c for y, c in zip(self.aps_count, self.locations)
         )
 
     def add_objective(self):
@@ -122,18 +123,17 @@ class Model:
         )
 
 
-def find_max_alpha(model: Model, facilities: int, tol= 1e-6):
+def find_max_alpha(model: Model, facilities: int, tol=1e-6):
     """
-        Search among possible alpha values 
-        to find the maximal value that allow the 
-        given instance to be feasible with the given number 
-        of facilities.
-        The value is searched using binary search.
+    Search among possible alpha values
+    to find the maximal value that allow the
+    given instance to be feasible with the given number
+    of facilities.
+    The value is searched using binary search.
     """
     min_alpha = 0.0
     max_alpha = 1.0
-    while abs(min_alpha -  max_alpha) > tol:
-        print(min_alpha, max_alpha)
+    while abs(min_alpha - max_alpha) > tol:
         alpha = (max_alpha + min_alpha) / 2
         model.build_model(facilities, alpha)
         if model.try_solve():
@@ -141,6 +141,7 @@ def find_max_alpha(model: Model, facilities: int, tol= 1e-6):
         else:
             max_alpha = alpha
     return alpha
+
 
 def find_max_alpha_by_facilities(model: Model, facility_max_count: int):
     """
@@ -168,4 +169,3 @@ def main():
 
 if __name__ == "__main__":
     main()
- 
