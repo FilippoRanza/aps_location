@@ -47,15 +47,15 @@ class Model:
         )
         return self
 
-    def build_model(self, facilities: int, alpha: float):
+    def build_model(self, facilities: int, alpha: float, one_sol: False):
         self.model = gp.Model()
         self.add_variables(len(self.locations), len(self.demand))
         self.add_constraints(facilities, alpha)
-        self.add_objective()
+        self.add_objective(one_sol)
 
     def try_solve(self):
         self.model.optimize()
-        return self.model.status == gp.GRB.OPTIMAL
+        return self.model.status == gp.GRB.OPTIMAL or self.model.status == gp.GRB.SOLUTION_LIMIT
 
     def add_variables(self, facility_locs: int, demand_locs: int):
         """
@@ -113,7 +113,7 @@ class Model:
             self.aps_count[y] <= c for y, c in zip(self.aps_count, self.locations)
         )
 
-    def add_objective(self):
+    def add_objective(self, one_sol):
         # Objective function (1)
         self.model.setObjective(
             gp.quicksum(
@@ -122,6 +122,8 @@ class Model:
             ),
             gp.GRB.MAXIMIZE,
         )
+        if one_sol:
+            self.model.setParam("SolutionLimit", 1)
 
 
 def find_max_alpha(model: Model, facilities: int, tol=1e-6):
@@ -136,7 +138,7 @@ def find_max_alpha(model: Model, facilities: int, tol=1e-6):
     max_alpha = 1.0
     while abs(min_alpha - max_alpha) > tol:
         alpha = (max_alpha + min_alpha) / 2
-        model.build_model(facilities, alpha)
+        model.build_model(facilities, alpha, True)
         if model.try_solve():
             min_alpha = alpha
         else:
