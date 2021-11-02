@@ -8,8 +8,9 @@ with the model describe in:
 In this script the problem is solved exactly using Gurobi.
 """
 
-
-from dataclasses import dataclass
+from argparse import ArgumentParser
+import json
+from dataclasses import dataclass, field
 
 import numpy as np
 import gurobipy as gp
@@ -151,21 +152,85 @@ def find_max_alpha_by_facilities(model: Model, facility_max_count: int):
     return [find_max_alpha(model, f + 1) for f in range(facility_max_count)]
 
 
-def main():
-    """
-    Script's main function.
-    Now it just contains some
-    random values to see if the
-    model compiles
-    """
-    demand = np.array([1, 2, 3])
-    config = Config(10, 20)
-    distances = np.array([[13, 21], [7, 8], [17, 10]])
-    locations = np.array([2, 2])
-    model = Model(demand, config, distances, locations).setup()
-    alpha = find_max_alpha_by_facilities(model, len(locations))
-    print(alpha)
+@dataclass
+class Instance:
+    demand: np.ndarray
+    distances: np.ndarray
+    locations: np.ndarray
 
+
+def to_ndarray(json_dict, name):
+    value = json_dict[name]
+    return np.array(value)
+
+
+def load_json_file(file_name):
+    with open(file_name) as file:
+        data = json.load(file)
+    return data
+
+
+def load_instance(file_name):
+    instance = load_json_file(file_name)
+    demand = to_ndarray(instance, "demand")
+    distances = to_ndarray(instance, "distances")
+    locations = to_ndarray(instance, "locations")
+
+    return Instance(demand, distances, locations)
+
+
+def load_config(file_name):
+    config = load_json_file(file_name)
+    configs = [Config(r1, r2) for r1, r2 in config]
+    return configs
+
+@dataclass
+class Log:
+    file_name: str
+    log: list = field(default_factory=list)
+
+    def add_entry(self, conf: Config, alphas):
+        conf = (conf.radius_small, conf.radius_large)
+        self.log.append((conf, alphas))
+
+    def save(self):
+        with open(self.file_name, "w") as fp:
+            json.dump(self.log, fp)
+
+def parse_args():
+    parser = ArgumentParser()
+    parser.add_argument(
+        "instance",
+        help="JSON file containing the instance. Loaded values are not validated",
+    )
+    parser.add_argument(
+        "config",
+        help="JSON file containing the radius values. Loaded values are not validated",
+    )
+
+    parser.add_argument(
+        "log_file",
+        help="Specify output log JSON file. If existing will be overwritten"
+    )
+
+    return parser.parse_args()
+
+
+def main():
+    """ """
+    args = parse_args()
+    instance = load_instance(args.instance)
+    config = load_config(args.config)
+
+    log = Log(args.log_file)
+    for conf in config:
+        model = Model(
+            instance.demand, conf, instance.distances, instance.locations
+        ).setup()
+        alpha = find_max_alpha_by_facilities(model, len(instance.locations))
+        log.add_entry(conf, alpha)
+
+    log.save()
 
 if __name__ == "__main__":
     main()
