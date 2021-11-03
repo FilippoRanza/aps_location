@@ -166,7 +166,7 @@ def find_max_alpha_by_facilities(model: Model, facility_max_count: int, jobs: in
 
     cb = PoolCallback(model)
     with Pool(jobs) as pool:
-        output = pool.map(cb.callback, range(facility_max_count))
+        output = pool.map(cb.callback, range(facility_max_count), chunksize=1)
 
     return list(output)
 
