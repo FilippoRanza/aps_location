@@ -11,6 +11,7 @@ In this script the problem is solved exactly using Gurobi.
 from argparse import ArgumentParser
 import json
 from dataclasses import dataclass, field
+from multiprocessing import Pool
 
 import numpy as np
 import gurobipy as gp
@@ -37,6 +38,7 @@ class Model:
     config: Config
     distances: np.ndarray
     locations: np.ndarray
+    thread_count: int
 
     def setup(self):
         self.gamma_coeff = compute_reach_coefficent(
@@ -51,7 +53,10 @@ class Model:
         self.model = gp.Model()
         self.add_variables(len(self.locations), len(self.demand))
         self.add_constraints(facilities, alpha)
-        self.add_objective(one_sol)
+        self.add_objective()
+        if one_sol:
+            self.model.setParam("SolutionLimit", 1)
+        self.model.setParam("Threads", self.thread_count)
 
     def try_solve(self):
         self.model.optimize()
@@ -113,7 +118,7 @@ class Model:
             self.aps_count[y] <= c for y, c in zip(self.aps_count, self.locations)
         )
 
-    def add_objective(self, one_sol):
+    def add_objective(self):
         # Objective function (1)
         self.model.setObjective(
             gp.quicksum(
@@ -122,8 +127,7 @@ class Model:
             ),
             gp.GRB.MAXIMIZE,
         )
-        if one_sol:
-            self.model.setParam("SolutionLimit", 1)
+
 
 
 def find_max_alpha(model: Model, facilities: int, tol=1e-6):
@@ -146,12 +150,25 @@ def find_max_alpha(model: Model, facilities: int, tol=1e-6):
     return alpha
 
 
-def find_max_alpha_by_facilities(model: Model, facility_max_count: int):
+@dataclass
+class PoolCallback:
+    model: Model
+
+    def callback(self, i):
+        return find_max_alpha(self.model, i)
+
+
+def find_max_alpha_by_facilities(model: Model, facility_max_count: int, jobs: int):
     """
     Find the maximal alpha value depending on the number of facilities.
     Tries with any possible facility count from 1 to facility_max_count
     """
-    return [find_max_alpha(model, f + 1) for f in range(facility_max_count)]
+
+    cb = PoolCallback(model)
+    with Pool(jobs) as pool:
+        output = pool.map(cb.callback, range(facility_max_count))
+
+    return list(output)
 
 
 @dataclass
@@ -216,6 +233,18 @@ def parse_args():
         "log_file", help="Specify output log JSON file. If existing will be overwritten"
     )
 
+    parser.add_argument(
+        "--threads", help="specify the number of thread for the backend solver. Default 0, automatic",
+        type=int,
+        default=0
+    )
+
+    parser.add_argument(
+        "--jobs", help="specify the number of parallel jobs to run. Default 1",
+        type=int,
+        default=1
+    )
+
     return parser.parse_args()
 
 
@@ -228,9 +257,9 @@ def main():
     log = Log(args.log_file)
     for conf in config:
         model = Model(
-            instance.demand, conf, instance.distances, instance.locations
+            instance.demand, conf, instance.distances, instance.locations, args.threads
         ).setup()
-        alpha = find_max_alpha_by_facilities(model, len(instance.locations))
+        alpha = find_max_alpha_by_facilities(model, len(instance.locations), args.jobs)
         log.add_entry(conf, alpha)
 
     log.save()
