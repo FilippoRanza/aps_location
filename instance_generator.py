@@ -63,7 +63,7 @@ def parse_args():
     parser.add_argument(
         "--instance",
         help="Output instance name. If existing will be overwritten",
-        required=True
+        required=True,
     )
 
     return parser.parse_args()
@@ -76,24 +76,27 @@ def random_ndarray(shape, min_val, max_val):
     rnd = rnd + min_val
     return rnd
 
+
 def save_instance(file_name, demand, locations, distance):
 
     output = {
         "demand": demand.tolist(),
         "locations": locations.tolist(),
-        "distances": distance.tolist()
+        "distances": distance.tolist(),
     }
 
     with open(file_name, "w") as fp:
         json.dump(output, fp)
 
+
 def main():
     args = parse_args()
     demand = random_ndarray(args.demand, args.min_demand, args.max_demand)
     locations = random_ndarray(args.facility, args.min_facility, args.max_facility)
-    distance = random_ndarray((args.demand, args.facility), args.min_distance, args.max_distance)
+    distance = random_ndarray(
+        (args.demand, args.facility), args.min_distance, args.max_distance
+    )
     save_instance(args.instance, demand, locations, distance)
-
 
 
 if __name__ == "__main__":

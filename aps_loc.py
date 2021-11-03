@@ -60,7 +60,10 @@ class Model:
 
     def try_solve(self):
         self.model.optimize()
-        return self.model.status == gp.GRB.OPTIMAL or self.model.status == gp.GRB.SOLUTION_LIMIT
+        return (
+            self.model.status == gp.GRB.OPTIMAL
+            or self.model.status == gp.GRB.SOLUTION_LIMIT
+        )
 
     def add_variables(self, facility_locs: int, demand_locs: int):
         """
@@ -127,7 +130,6 @@ class Model:
             ),
             gp.GRB.MAXIMIZE,
         )
-
 
 
 def find_max_alpha(model: Model, facilities: int, tol=1e-6):
@@ -234,15 +236,17 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--threads", help="specify the number of thread for the backend solver. Default 0, automatic",
+        "--threads",
+        help="specify the number of thread for the backend solver. Default 0, automatic",
         type=int,
-        default=0
+        default=0,
     )
 
     parser.add_argument(
-        "--jobs", help="specify the number of parallel jobs to run. Default 1",
+        "--jobs",
+        help="specify the number of parallel jobs to run. Default 1",
         type=int,
-        default=1
+        default=1,
     )
 
     return parser.parse_args()
