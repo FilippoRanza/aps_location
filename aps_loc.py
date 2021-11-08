@@ -9,58 +9,12 @@ In this script the problem is solved exactly using Gurobi.
 """
 
 from argparse import ArgumentParser
-import json
-from dataclasses import dataclass, field
-from multiprocessing import Pool
+from dataclasses import dataclass
 
 import numpy as np
-import gurobipy as gp
 
 from models import Model, GendreauLaporteSemetModel, ModelConfig
-
-
-
-
-
-def find_max_alpha(model: Model, facilities: int, tol=1e-6):
-    """
-    Search among possible alpha values
-    to find the maximal value that allow the
-    given instance to be feasible with the given number
-    of facilities.
-    The value is searched using binary search.
-    """
-    min_alpha = 0.0
-    max_alpha = 1.0
-    while abs(min_alpha - max_alpha) > tol:
-        alpha = (max_alpha + min_alpha) / 2
-        model.build_model(facilities, alpha)
-        if model.is_fesible():
-            min_alpha = alpha
-        else:
-            max_alpha = alpha
-    return alpha
-
-
-@dataclass
-class PoolCallback:
-    model: Model
-
-    def callback(self, i):
-        return find_max_alpha(self.model, i)
-
-
-def find_max_alpha_by_facilities(model: Model, facility_max_count: int, jobs: int):
-    """
-    Find the maximal alpha value depending on the number of facilities.
-    Tries with any possible facility count from 1 to facility_max_count
-    """
-
-    cb = PoolCallback(model)
-    with Pool(jobs) as pool:
-        output = pool.map(cb.callback, range(facility_max_count), chunksize=1)
-
-    return list(output)
+from utils import find_max_alpha_by_facilities, Log, load_json_file, to_ndarray
 
 
 @dataclass
@@ -68,17 +22,6 @@ class Instance:
     demand: np.ndarray
     distances: np.ndarray
     locations: np.ndarray
-
-
-def to_ndarray(json_dict, name):
-    value = json_dict[name]
-    return np.array(value)
-
-
-def load_json_file(file_name):
-    with open(file_name) as file:
-        data = json.load(file)
-    return data
 
 
 def load_instance(file_name):
@@ -94,20 +37,6 @@ def load_config(file_name):
     config = load_json_file(file_name)
     configs = [ModelConfig(r1, r2) for r1, r2 in config]
     return configs
-
-
-@dataclass
-class Log:
-    file_name: str
-    log: list = field(default_factory=list)
-
-    def add_entry(self, conf, alphas):
-        conf = (conf.radius_small, conf.radius_large)
-        self.log.append((conf, alphas))
-
-    def save(self):
-        with open(self.file_name, "w") as fp:
-            json.dump(self.log, fp)
 
 
 def parse_args():

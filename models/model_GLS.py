@@ -19,11 +19,11 @@ def compute_reach_coefficent(distances: np.ndarray, time: float):
     tmp = distances <= time
     return tmp.astype(np.int8)
 
+
 @dataclass
 class ModelConfig:
     radius_small: float
     radius_large: float
-
 
 
 @dataclass
@@ -53,18 +53,6 @@ class GendreauLaporteSemetModel(Model):
         self.add_constraints(facilities, alpha)
         self.add_objective()
         self.model.setParam("Threads", self.thread_count)
-
-    def is_fesible(self):
-        self.model.setParam("SolutionLimit", 1)
-        self.model.optimize()
-        return (
-            self.model.status == gp.GRB.OPTIMAL
-            or self.model.status == gp.GRB.SOLUTION_LIMIT
-        )
-
-    def solve(self):
-        self.model.optimize()
-        return self.model
 
     def add_variables(self, facility_locs: int, demand_locs: int):
         """
@@ -131,6 +119,3 @@ class GendreauLaporteSemetModel(Model):
             ),
             gp.GRB.MAXIMIZE,
         )
-
-
-
