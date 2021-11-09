@@ -21,11 +21,12 @@ class MyModelOne(Model):
 
     def build_model(self, aps_count: int, alpha: float):
         self.model = gp.Model()
-        self.setup_variables(*self.delta_coeff.size)
+        self.setup_variables()
         self.setup_contraints(aps_count, alpha, self.delta_coeff)
         self.setup_objective_function(self.lambda_coeff)
 
-    def setup_variables(self, cust_count: int, loc_count: int):
+    def setup_variables(self):
+        cust_count, loc_count = self.delta_coeff.shape
         self.facility_vars = self.model.addVars(
             range(loc_count), vtype=gp.GRB.BINARY, name="y"
         )
@@ -35,35 +36,38 @@ class MyModelOne(Model):
 
         self.customer_facility_assign_vars = [
             self.model.addVars(
-                ((i, j) for i in range(cust_count)),
+                range(loc_count),
                 vtype=gp.GRB.BINARY,
-                name="x",
+                name=f"x_{j}",
             )
-            for j in range(loc_count)
+            for j in range(cust_count)
         ]
+        self.model.update()
 
     def setup_contraints(self, aps_count: int, alpha: float, delta_coeff: np.ndarray):
+        cust_count, loc_count = self.delta_coeff.shape
+
         # constrain 1
         self.model.addConstr(gp.quicksum(self.facility_vars) == aps_count)
 
         # constrain 2
+
         self.model.addConstrs(
-            z <= gp.quicksum(x_row)
-            for z, x_row in zip(self.customer_vars, self.customer_facility_assign_vars)
+            self.customer_vars[i]
+            <= gp.quicksum(self.customer_facility_assign_vars[i].values())
+            for i in range(cust_count)
         )
 
-        # constrain 3
         self.model.addConstr(
-            gp.quicksum(self.customer_vars) >= alpha * len(self.customer_vars)
+            gp.quicksum(self.customer_vars.values()) >= alpha * len(self.customer_vars)
         )
 
         # constrain 4
         self.model.addConstrs(
-            self.customer_facility_assign_vars[x] <= d * y
-            for x, d in zip(x_row, d_row)
-            for x_row, d_row, y in zip(
-                self.customer_facility_assign_vars, delta_coeff, self.facility_vars
-            )
+            self.customer_facility_assign_vars[i][j]
+            <= delta_coeff[i, j] * self.facility_vars[j]
+            for i in range(cust_count)
+            for j in range(loc_count)
         )
 
     def setup_objective_function(self, coeff: np.ndarray):

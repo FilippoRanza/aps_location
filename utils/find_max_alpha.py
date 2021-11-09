@@ -6,6 +6,7 @@ from multiprocessing import Pool
 
 from models import Model
 
+
 def find_max_alpha(model: Model, facilities: int, tol=1e-6):
     """
     Search among possible alpha values

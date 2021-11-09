@@ -14,10 +14,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import gurobipy as gp
 
-
-def compute_reach_coefficent(distances: np.ndarray, time: float):
-    tmp = distances <= time
-    return tmp.astype(np.int8)
+from utils import compute_reach_coefficent
 
 
 @dataclass
