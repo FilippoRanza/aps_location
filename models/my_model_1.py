@@ -25,6 +25,9 @@ class MyModelOne(Model):
     delta_coeff: np.ndarray
     threads: int
 
+    def get_vars(self):
+        return self.facility_vars, self.customer_facility_assign_vars
+
     def build_model(self, aps_count: int, alpha: float):
         self.model = gp.Model()
         self.setup_variables()

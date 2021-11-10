@@ -4,6 +4,10 @@ import gurobipy as gp
 
 
 class Model:
+
+    def get_vars(self):
+        raise NotImplementedError()
+
     def setup(self):
         return self
 
