@@ -4,9 +4,8 @@
 
 import numpy as np
 
-from models import Model, MyModelOne, ModelConfig, MyModelOneInstance
+from models import Model, MyModelOne, ModelConfig, MyModelOneInstance, find_max_alpha_by_facilities
 from utils import (
-    find_max_alpha_by_facilities,
     Log,
     parse_args,
     load_instance,
