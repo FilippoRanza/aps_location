@@ -4,7 +4,7 @@
 from dataclasses import dataclass
 from multiprocessing import Pool
 
-from models import Model
+from .abstract_model import Model
 
 
 def find_max_alpha(model: Model, facilities: int, tol=1e-6):
