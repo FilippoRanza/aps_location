@@ -1,11 +1,10 @@
 #! /usr/bin/python
 
 
-from dataclasses import dataclass
 
 import numpy as np
 
-from models import Model, MyModelOne, ModelConfig
+from models import Model, MyModelOne, ModelConfig, MyModelOneInstance
 from utils import (
     find_max_alpha_by_facilities,
     Log,
@@ -16,10 +15,6 @@ from utils import (
 )
 
 
-@dataclass
-class Instance:
-    lambda_coeff: np.ndarray
-    distances: np.ndarray
 
 
 def load_config(file_name):
@@ -30,7 +25,7 @@ def load_config(file_name):
 def main():
     """ """
     args = parse_args()
-    instance = load_instance(Instance, args.instance)
+    instance = load_instance(MyModelOneInstance, args.instance)
     config = load_config(args.config)
 
     log = Log(args.log_file)

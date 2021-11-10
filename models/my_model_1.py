@@ -11,6 +11,12 @@ import gurobipy as gp
 
 from .abstract_model import Model
 
+@dataclass
+class MyModelOneInstance:
+    lambda_coeff: np.ndarray
+    distances: np.ndarray
+
+
 
 @dataclass
 class MyModelOne(Model):

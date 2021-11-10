@@ -1,3 +1,4 @@
+*.7z
 *.json
 bin/
 lib/
