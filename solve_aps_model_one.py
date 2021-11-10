@@ -15,8 +15,8 @@ from utils import load_instance, compute_reach_coefficent, export_results
 
 
 
-def solve(lambda_coeff, delta_coeff, alpha, aps_count):
-    model = MyModelOne(lambda_coeff, delta_coeff, 0)
+def solve(distance, lambda_coeff, delta_coeff, alpha, aps_count):
+    model = MyModelOne(distance, lambda_coeff, delta_coeff, 0)
     model.build_model(aps_count, alpha)
     model.solve()
     y_vars, x_vars = model.get_vars()
@@ -38,8 +38,8 @@ def main():
     args = parse_args()
     instance = load_instance(MyModelOneInstance, args.instance)
     delta_coeff = compute_reach_coefficent(instance.distances, args.radius)
-    y, x = solve(instance.lambda_coeff, delta_coeff, args.alpha, args.aps_count)
-    export_results("results.json", y=y, x=x)
+    y, x = solve(instance.distances, instance.lambda_coeff, delta_coeff, args.alpha, args.aps_count)
+    export_results("results-new.json", y=y, x=x)
 
 if __name__ == '__main__':
     main()

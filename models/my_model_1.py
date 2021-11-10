@@ -20,7 +20,7 @@ class MyModelOneInstance:
 
 @dataclass
 class MyModelOne(Model):
-
+    distances: np.ndarray
     lambda_coeff: np.ndarray
     delta_coeff: np.ndarray
     threads: int
@@ -30,6 +30,7 @@ class MyModelOne(Model):
 
     def build_model(self, aps_count: int, alpha: float):
         self.model = gp.Model()
+        self.multiple = True
         self.setup_variables()
         self.setup_contraints(aps_count, alpha, self.delta_coeff)
         self.setup_objective_function(self.lambda_coeff)
@@ -80,9 +81,35 @@ class MyModelOne(Model):
         )
 
     def setup_objective_function(self, coeff: np.ndarray):
-        self.model.setObjective(
+        if self.multiple:
+            self.multiple_objective(coeff)
+        else:
+            self.single_objective(coeff)
+
+
+    def single_objective(self, coeff: np.ndarray):
+            self.model.setObjective(
             gp.quicksum(
                 l * self.facility_vars[y] for l, y in zip(coeff, self.facility_vars)
             ),
-            gp.GRB.MAXIMIZE,
+            gp.GRB.MAXIMIZE
+        )
+
+    def multiple_objective(self, coeff: np.ndarray):
+        self.model.setAttr("ModelSense", -1)
+        self.model.setObjectiveN(
+            gp.quicksum(
+                l * self.facility_vars[y] for l, y in zip(coeff, self.facility_vars)
+            ),
+            0,
+            
+        )
+        cust_count, stop_count = self.distances.shape
+        self.model.setObjectiveN(
+            gp.quicksum(
+                self.distances[i, j] * self.customer_facility_assign_vars[i][j]
+                for i in range(cust_count) for j in range(stop_count)
+            ),
+            1,
+            weight=-1,
         )

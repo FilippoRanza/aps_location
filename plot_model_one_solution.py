@@ -37,7 +37,7 @@ def plot_stops(stops, selected_stops):
             marker = 'o'
             color='k'
 
-        plt.scatter([x], [y], marker=marker,c=color)    
+        plt.scatter([x], [y], marker=marker,c=color, s=50)    
     return color_sel
 
 
