@@ -97,6 +97,7 @@ class MyModelOne(Model):
 
     def multiple_objective(self, coeff: np.ndarray):
         self.model.setAttr("ModelSense", -1)
+        coeff = normalize(coeff)
         self.model.setObjectiveN(
             gp.quicksum(
                 l * self.facility_vars[y] for l, y in zip(coeff, self.facility_vars)
@@ -105,11 +106,16 @@ class MyModelOne(Model):
             
         )
         cust_count, stop_count = self.distances.shape
+        distances = normalize(self.distances)
         self.model.setObjectiveN(
             gp.quicksum(
-                self.distances[i, j] * self.customer_facility_assign_vars[i][j]
+                distances[i, j] * self.customer_facility_assign_vars[i][j]
                 for i in range(cust_count) for j in range(stop_count)
             ),
             1,
             weight=-1,
         )
+
+def normalize(v: np.ndarray):
+    norm = sum(sum(v))
+    return v / norm
