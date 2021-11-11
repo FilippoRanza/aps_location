@@ -79,6 +79,13 @@ class MyModelOne(Model):
             for i in range(cust_count)
             for j in range(loc_count)
         )
+        
+        """
+        load = np.ceil(cust_count / aps_count)
+        self.model.addConstrs(
+            gp.quicksum(self.customer_facility_assign_vars[i][j] for i in range(cust_count)) <= load
+            for j in range(loc_count)
+        )"""
 
     def setup_objective_function(self, coeff: np.ndarray):
         if self.multiple:
@@ -96,24 +103,18 @@ class MyModelOne(Model):
         )
 
     def multiple_objective(self, coeff: np.ndarray):
-        self.model.setAttr("ModelSense", -1)
         coeff = normalize(coeff)
-        self.model.setObjectiveN(
-            gp.quicksum(
-                l * self.facility_vars[y] for l, y in zip(coeff, self.facility_vars)
-            ),
-            0,
-            
-        )
         cust_count, stop_count = self.distances.shape
         distances = normalize(self.distances)
-        self.model.setObjectiveN(
+        self.model.setObjective(
+            gp.quicksum(
+                l * self.facility_vars[y] for l, y in zip(coeff, self.facility_vars)
+            ) - 
             gp.quicksum(
                 distances[i, j] * self.customer_facility_assign_vars[i][j]
                 for i in range(cust_count) for j in range(stop_count)
             ),
-            1,
-            weight=-1,
+            gp.GRB.MAXIMIZE
         )
 
 def normalize(v: np.ndarray):

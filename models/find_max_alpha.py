@@ -32,7 +32,7 @@ class PoolCallback:
     model: Model
 
     def callback(self, i):
-        return find_max_alpha(self.model, i)
+        return find_max_alpha(self.model, i + 1)
 
 
 def find_max_alpha_by_facilities(model: Model, facility_max_count: int, jobs: int):

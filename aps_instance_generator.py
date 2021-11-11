@@ -113,7 +113,7 @@ def main():
     clients = place_points(client_count, width, height)
     stop_count = 20
     stops = make_stops(stop_count, width, height, 4500)
-    lambda_coeff = make_lambda_coeff(stop_count, 150, 750)
+    lambda_coeff = make_lambda_coeff(stop_count, 500, 17500)
 
     show_instances(clients, stops)
 
