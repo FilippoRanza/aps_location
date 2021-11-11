@@ -117,5 +117,5 @@ class MyModelOne(Model):
         )
 
 def normalize(v: np.ndarray):
-    norm = sum(sum(v))
+    norm = v.sum()
     return v / norm
