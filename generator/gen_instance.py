@@ -42,7 +42,7 @@ def build_distance_matrix(clients, stations):
             output[i, j] = distance(c, s)
     return output
 
-
+@dataclass
 class StopConfiguration:
     count: int
     delta_x: int
@@ -52,13 +52,15 @@ class StopConfiguration:
 
 def gen_stops(sc: StopConfiguration):
     stops = []
-    while len(stops) < stop_conf.count:
-        y = x + np.random.randint(-stop_conf.delta_y, stop_conf.delta_y)
-        x += np.random.randint(-stop_conf.delta_x, stop_conf.delta_x)
-        stops.append((x, y))
+    x = 0
+    while len(stops) < sc.count:
+        y = x + np.random.randint(-sc.delta_y, sc.delta_y)
+        x_tmp = x + np.random.randint(-sc.delta_x, sc.delta_x)
+        stops.append((x_tmp, y))
+        x += sc.distance
     return stops
 
-
+@dataclass
 class ClientConfig:
     min_count: int
     max_count: int
@@ -70,7 +72,7 @@ def gen_client(cc: ClientConfig, stops):
 
     clients = []
     lambda_coeff = []
-    for s in stations:
+    for s in stops:
         amt = np.random.randint(cc.min_count, cc.max_count)
         lambda_coeff.append(amt)
         scale = np.random.randint(cc.min_scale, cc.max_scale)
