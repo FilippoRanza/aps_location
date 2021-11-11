@@ -11,11 +11,11 @@ import gurobipy as gp
 
 from .abstract_model import Model
 
+
 @dataclass
 class MyModelOneInstance:
     lambda_coeff: np.ndarray
     distances: np.ndarray
-
 
 
 @dataclass
@@ -79,7 +79,7 @@ class MyModelOne(Model):
             for i in range(cust_count)
             for j in range(loc_count)
         )
-        
+
         """
         load = np.ceil(cust_count / aps_count)
         self.model.addConstrs(
@@ -93,13 +93,12 @@ class MyModelOne(Model):
         else:
             self.single_objective(coeff)
 
-
     def single_objective(self, coeff: np.ndarray):
-            self.model.setObjective(
+        self.model.setObjective(
             gp.quicksum(
                 l * self.facility_vars[y] for l, y in zip(coeff, self.facility_vars)
             ),
-            gp.GRB.MAXIMIZE
+            gp.GRB.MAXIMIZE,
         )
 
     def multiple_objective(self, coeff: np.ndarray):
@@ -109,13 +108,15 @@ class MyModelOne(Model):
         self.model.setObjective(
             gp.quicksum(
                 l * self.facility_vars[y] for l, y in zip(coeff, self.facility_vars)
-            ) - 
-            gp.quicksum(
+            )
+            - gp.quicksum(
                 distances[i, j] * self.customer_facility_assign_vars[i][j]
-                for i in range(cust_count) for j in range(stop_count)
+                for i in range(cust_count)
+                for j in range(stop_count)
             ),
-            gp.GRB.MAXIMIZE
+            gp.GRB.MAXIMIZE,
         )
+
 
 def normalize(v: np.ndarray):
     norm = v.sum()

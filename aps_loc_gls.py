@@ -12,7 +12,12 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from models import Model, GendreauLaporteSemetModel, ModelConfig, find_max_alpha_by_facilities
+from models import (
+    Model,
+    GendreauLaporteSemetModel,
+    ModelConfig,
+    find_max_alpha_by_facilities,
+)
 from utils import (
     Log,
     parse_args,

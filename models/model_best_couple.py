@@ -19,7 +19,7 @@ from .abstract_model import Model
 @dataclass
 class FindBestCoupling(Model):
     distances: np.ndarray
-    #delta_coeff: np.ndarray
+    # delta_coeff: np.ndarray
 
     def build_model(self):
         customers, stops = self.distances.shape
@@ -49,18 +49,16 @@ class FindBestCoupling(Model):
 
     def add_objective_function(self, customers: int, stops: int):
         self.model.setObjective(
-            gp.quicksum(self.coupling[i, j] * self.distances[i, j]
-            for i in range(customers)
-            for j in range(stops)),
-            gp.GRB.MINIMIZE
+            gp.quicksum(
+                self.coupling[i, j] * self.distances[i, j]
+                for i in range(customers)
+                for j in range(stops)
+            ),
+            gp.GRB.MINIMIZE,
         )
-   
+
 
 def get_gamma_param(customer: int, stops: int):
     tmp = customer / stops
-    tmp = np.ceil(tmp) 
+    tmp = np.ceil(tmp)
     return tmp
-
-
-
-

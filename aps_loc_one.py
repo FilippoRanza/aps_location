@@ -1,10 +1,15 @@
 #! /usr/bin/python
 
 
-
 import numpy as np
 
-from models import Model, MyModelOne, ModelConfig, MyModelOneInstance, find_max_alpha_by_facilities
+from models import (
+    Model,
+    MyModelOne,
+    ModelConfig,
+    MyModelOneInstance,
+    find_max_alpha_by_facilities,
+)
 from utils import (
     Log,
     parse_args,
@@ -12,8 +17,6 @@ from utils import (
     compute_reach_coefficent,
     load_json_file,
 )
-
-
 
 
 def load_config(file_name):
@@ -30,7 +33,9 @@ def main():
     log = Log(args.log_file)
     for conf in config:
         delta_coeff = compute_reach_coefficent(instance.distances, conf)
-        model = MyModelOne(instance.distances, instance.lambda_coeff, delta_coeff, args.threads)
+        model = MyModelOne(
+            instance.distances, instance.lambda_coeff, delta_coeff, args.threads
+        )
         alpha = find_max_alpha_by_facilities(
             model, len(instance.lambda_coeff), args.jobs
         )

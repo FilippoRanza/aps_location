@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import json
 
+
 def place_points(count, width, height):
     points = set()
     while len(points) < count:
@@ -19,12 +20,14 @@ def place_points(count, width, height):
         points.add((x, y))
     return list(points)
 
+
 def delta_vect(count, delta):
     output = np.zeros(count)
     for i in range(count):
         d = secrets.randbelow(2 * delta) - delta
         output[i] = d
     return output
+
 
 def make_stops(count, width, height, delta):
     x = np.linspace(0, width, count) + delta_vect(count, delta)
@@ -48,6 +51,7 @@ def euclid_distance(p1, p2):
     y_dist = (y1 - y2) ** 2
     return np.sqrt(x_dist + y_dist)
 
+
 def make_distance_matrix(clients, stops):
     output = np.zeros((len(clients), len(stops)))
     for i, c in enumerate(clients):
@@ -55,33 +59,31 @@ def make_distance_matrix(clients, stops):
             output[i, j] = euclid_distance(c, s)
     return output
 
+
 def make_lambda_coeff(stops, min_val, max_val):
     diff = max_val - min_val
     return [secrets.randbelow(diff) + min_val for _ in range(stops)]
-    
+
 
 def make_instance(lambda_coeff, distances):
 
     distance = distances.tolist()
-    instance = {
-        'lambda_coeff': lambda_coeff,
-        'distances': distance
-    }
+    instance = {"lambda_coeff": lambda_coeff, "distances": distance}
     return json.dumps(instance)
+
 
 def make_location(clients, stops):
     clients = clients
     stops = stops
-    locations = {
-        "clients": clients,
-        "stops": stops
-    }
-    return  json.dumps(locations)
+    locations = {"clients": clients, "stops": stops}
+    return json.dumps(locations)
+
 
 def round_distance(val, order):
     val = np.round(val).astype(np.int32)
-    val -= (val % order)
+    val -= val % order
     return val
+
 
 def make_radius(distances, order):
     distances = round_distance(distances, order)
@@ -97,7 +99,6 @@ def make_radius(distances, order):
     radius_list = [int(x) for x, _ in count_list if x]
     radius_list.sort()
     return json.dumps(radius_list)
-
 
 
 def show_instances(clients, stops):
@@ -131,5 +132,6 @@ def main():
     except IndexError:
         print(instance)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

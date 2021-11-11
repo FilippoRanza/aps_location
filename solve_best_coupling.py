@@ -14,19 +14,21 @@ def parse_args():
     parser = ArgumentParser()
 
     parser.add_argument("distances", help="set distance file")
-    #parser.add_argument("radius", help="set max accetable distance", type=int)
+    # parser.add_argument("radius", help="set max accetable distance", type=int)
 
     return parser.parse_args()
+
 
 def main():
     args = parse_args()
     data = load_json_file(args.distances)
-    distances = to_ndarray(data, 'distances')
-    #delta_coeff = compute_reach_coefficent(distances, args.radius)
+    distances = to_ndarray(data, "distances")
+    # delta_coeff = compute_reach_coefficent(distances, args.radius)
 
     model = FindBestCoupling(distances)
     model.build_model()
     model.solve()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

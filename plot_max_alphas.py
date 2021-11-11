@@ -30,11 +30,10 @@ def load_instance(file_name):
     return output
 
 
-
 def plot_one_figure(inst: dict, min_th, max_th):
     legend = []
     for k, v in inst.items():
-        sel =  np.logical_and(min_th <= v, v <= max_th) 
+        sel = np.logical_and(min_th <= v, v <= max_th)
         if sel.any():
             x = np.arange(1, len(v) + 1)
             x_sel = x[sel]
@@ -45,15 +44,24 @@ def plot_one_figure(inst: dict, min_th, max_th):
     plt.legend(legend)
     plt.grid(alpha=0.65, linestyle="dotted")
     plt.xticks(x)
-    
 
 
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument("--title", help="set image title")
     parser.add_argument("log_file", help="output file from asp_loc.py")
-    parser.add_argument("--min-threshold", help="set the minimal alpha to show. Default to 0.4", type=float, default=0.4)
-    parser.add_argument("--max-threshold", help="set the maximal alpha to show. Default to 0.95", type=float, default=0.95)
+    parser.add_argument(
+        "--min-threshold",
+        help="set the minimal alpha to show. Default to 0.4",
+        type=float,
+        default=0.4,
+    )
+    parser.add_argument(
+        "--max-threshold",
+        help="set the maximal alpha to show. Default to 0.95",
+        type=float,
+        default=0.95,
+    )
     return parser.parse_args()
 
 
