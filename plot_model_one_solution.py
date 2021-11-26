@@ -34,14 +34,14 @@ def plot_stops(stops, selected_stops):
     color_sel = {}
     for i, (sel, (x, y)) in enumerate(zip(selected_stops, stops)):
         if sel:
-            marker = "X"
+            marker = "s"
             color = random_color()
             color_sel[i] = color
         else:
             marker = "o"
             color = "k"
 
-        plt.scatter([x], [y], marker=marker, c=color, s=50)
+        plt.scatter([x], [y], marker=marker, c=color, s=105)
     return color_sel
 
 
@@ -67,18 +67,26 @@ def plot_client(colors, client_loc, solution):
             client_sel[sel] = ClientCoordinate(client_loc[i])
 
     for sel, coord in client_sel.items():
-        plt.scatter(coord.x, coord.y, marker=".", c=colors[sel])
+        plt.scatter(coord.x, coord.y, marker=".", c=colors[sel], s=35)
 
 
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument("locations", help="set location JSON file")
     parser.add_argument("solution", help="set solution file")
+    parser.add_argument("--title", help="set image title", default="")
+    parser.add_argument("--file", help="save image to file", default=None)
 
     return parser.parse_args()
 
+def set_plot_relative_size(delta_w, delta_h):
+    w, h = plt.rcParams["figure.figsize"]
+    w *= delta_w
+    h *= delta_h
+    plt.rcParams["figure.figsize"] = (w, h)  
 
 def main():
+    set_plot_relative_size(4, 4)
     args = parse_args()
     locations = load_json_file(args.locations)
     stops = to_ndarray(locations, "stops")
@@ -91,8 +99,15 @@ def main():
     colors = plot_stops(stops, selected_stops)
     plot_client(colors, clients, solution)
 
+    if args.title:
+        plt.title(args.title)
+
     plt.tight_layout()
-    plt.show()
+
+    if args.file:
+        plt.savefig(args.file)
+    else:
+        plt.show()
 
 
 if __name__ == "__main__":

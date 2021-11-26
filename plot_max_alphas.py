@@ -62,10 +62,17 @@ def parse_args():
         type=float,
         default=0.95,
     )
+    parser.add_argument("--file", help="save image to file", default=None)
     return parser.parse_args()
 
+def set_plot_relative_size(delta_w, delta_h):
+    w, h = plt.rcParams["figure.figsize"]
+    w *= delta_w
+    h *= delta_h
+    plt.rcParams["figure.figsize"] = (w, h)  
 
 def main():
+    set_plot_relative_size(4, 4)
     args = parse_args()
     logs = load_instance(args.log_file)
     plot_one_figure(logs, args.min_threshold, args.max_threshold)
@@ -73,7 +80,10 @@ def main():
         plt.title(args.title)
 
     plt.tight_layout()
-    plt.show()
+    if args.file:
+        plt.savefig(args.file)
+    else:
+        plt.show()
 
 
 if __name__ == "__main__":

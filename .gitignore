@@ -1,5 +1,6 @@
 *.7z
 *.json
+*.eps
 bin/
 lib/
 lib64
