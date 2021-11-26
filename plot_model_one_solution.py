@@ -6,6 +6,7 @@ Plot the soluton from Model one
 from argparse import ArgumentParser
 
 import numpy as np
+import matplotlib
 from matplotlib import pyplot as plt
 
 from utils import load_json_file, to_ndarray
@@ -19,7 +20,7 @@ def find_assignment(client_assignment):
     selected = client_assignment == 1
     indexes = [i for i in range(len(selected)) if selected[i]]
     if indexes:
-        return np.random.choice(indexes, 1)[0]
+        return np.random.choice(indexes, 1)[0] 
     return None
 
 
@@ -86,6 +87,10 @@ def set_plot_relative_size(delta_w, delta_h):
     plt.rcParams["figure.figsize"] = (w, h)  
 
 def main():
+    font = {'family' : 'normal',
+        'size'   : 22}
+
+    matplotlib.rc('font', **font)
     set_plot_relative_size(4, 4)
     args = parse_args()
     locations = load_json_file(args.locations)

@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 from dataclasses import dataclass
 
 import numpy as np
+import matplotlib
 from matplotlib import pyplot as plt
 
 from utils import load_instance
@@ -37,6 +38,10 @@ def set_plot_relative_size(delta_w, delta_h):
     plt.rcParams["figure.figsize"] = (w, h)  
 
 def main():
+    font = {'family' : 'normal',
+        'size'   : 22}
+
+    matplotlib.rc('font', **font)
     set_plot_relative_size(4, 4)
     args = parse_args()
     locs = load_instance(Locations, args.locations)

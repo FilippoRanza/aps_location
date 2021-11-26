@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 import json
 
 import numpy as np
+import matplotlib
 from matplotlib import pyplot as plt
 
 
@@ -72,6 +73,10 @@ def set_plot_relative_size(delta_w, delta_h):
     plt.rcParams["figure.figsize"] = (w, h)  
 
 def main():
+    font = {'family' : 'normal',
+        'size'   : 22}
+
+    matplotlib.rc('font', **font)
     set_plot_relative_size(4, 4)
     args = parse_args()
     logs = load_instance(args.log_file)
