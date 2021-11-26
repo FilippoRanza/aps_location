@@ -30,7 +30,7 @@ class MyModelOne(Model):
 
     def build_model(self, aps_count: int, alpha: float):
         self.model = gp.Model()
-        self.multiple = True
+        self.multiple = False 
         self.setup_variables()
         self.setup_contraints(aps_count, alpha, self.delta_coeff)
         self.setup_objective_function(self.lambda_coeff)

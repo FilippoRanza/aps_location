@@ -16,13 +16,13 @@ import generator as gen
 
 
 
-def show_points(points):
+def show_points(points, marker):
     X = []
     Y = []
     for x, y in points:
         X.append(x)
         Y.append(y)
-    plt.scatter(X, Y)
+    plt.scatter(X, Y, marker=marker)
 
 
 def make_instance(lambda_coeff, distances):
@@ -62,8 +62,8 @@ def make_radius(distances, order):
 
 
 def show_instances(clients, stops):
-    show_points(clients)
-    show_points(stops)
+    show_points(clients, '.')
+    show_points(stops, 'o')
     plt.show()
 
 
